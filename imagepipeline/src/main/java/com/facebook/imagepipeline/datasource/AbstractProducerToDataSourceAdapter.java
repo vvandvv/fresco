@@ -19,7 +19,9 @@ import com.facebook.imagepipeline.request.HasImageRequest;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.systrace.FrescoSystrace;
 import com.facebook.infer.annotation.Nullsafe;
+
 import java.util.Map;
+
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -31,106 +33,106 @@ import javax.annotation.concurrent.ThreadSafe;
 @Nullsafe(Nullsafe.Mode.STRICT)
 @ThreadSafe
 public abstract class AbstractProducerToDataSourceAdapter<T> extends AbstractDataSource<T>
-    implements HasImageRequest {
+        implements HasImageRequest {
 
-  private final SettableProducerContext mSettableProducerContext;
-  private final RequestListener2 mRequestListener;
+    private final SettableProducerContext mSettableProducerContext;
+    private final RequestListener2 mRequestListener;
 
-  protected AbstractProducerToDataSourceAdapter(
-      Producer<T> producer,
-      SettableProducerContext settableProducerContext,
-      RequestListener2 requestListener) {
-    if (FrescoSystrace.isTracing()) {
-      FrescoSystrace.beginSection("AbstractProducerToDataSourceAdapter()");
+    protected AbstractProducerToDataSourceAdapter(
+            Producer<T> producer,
+            SettableProducerContext settableProducerContext,
+            RequestListener2 requestListener) {
+        if (FrescoSystrace.isTracing()) {
+            FrescoSystrace.beginSection("AbstractProducerToDataSourceAdapter()");
+        }
+        mSettableProducerContext = settableProducerContext;
+        mRequestListener = requestListener;
+        setInitialExtras();
+        if (FrescoSystrace.isTracing()) {
+            FrescoSystrace.beginSection("AbstractProducerToDataSourceAdapter()->onRequestStart");
+        }
+        mRequestListener.onRequestStart(mSettableProducerContext);
+        if (FrescoSystrace.isTracing()) {
+            FrescoSystrace.endSection();
+        }
+        if (FrescoSystrace.isTracing()) {
+            FrescoSystrace.beginSection("AbstractProducerToDataSourceAdapter()->produceResult");
+        }
+        producer.produceResults(createConsumer(), settableProducerContext);
+        if (FrescoSystrace.isTracing()) {
+            FrescoSystrace.endSection();
+        }
+        if (FrescoSystrace.isTracing()) {
+            FrescoSystrace.endSection();
+        }
     }
-    mSettableProducerContext = settableProducerContext;
-    mRequestListener = requestListener;
-    setInitialExtras();
-    if (FrescoSystrace.isTracing()) {
-      FrescoSystrace.beginSection("AbstractProducerToDataSourceAdapter()->onRequestStart");
+
+    private Consumer<T> createConsumer() {
+        return new BaseConsumer<T>() {
+            @Override
+            protected void onNewResultImpl(@Nullable T newResult, @Status int status) {
+                AbstractProducerToDataSourceAdapter.this.onNewResultImpl(
+                        newResult, status, mSettableProducerContext);
+            }
+
+            @Override
+            protected void onFailureImpl(Throwable throwable) {
+                AbstractProducerToDataSourceAdapter.this.onFailureImpl(throwable);
+            }
+
+            @Override
+            protected void onCancellationImpl() {
+                AbstractProducerToDataSourceAdapter.this.onCancellationImpl();
+            }
+
+            @Override
+            protected void onProgressUpdateImpl(float progress) {
+                AbstractProducerToDataSourceAdapter.this.setProgress(progress);
+            }
+        };
     }
-    mRequestListener.onRequestStart(mSettableProducerContext);
-    if (FrescoSystrace.isTracing()) {
-      FrescoSystrace.endSection();
+
+    protected void onNewResultImpl(@Nullable T result, int status, ProducerContext producerContext) {
+        boolean isLast = BaseConsumer.isLast(status);
+        if (super.setResult(result, isLast, getExtras(producerContext))) {
+            if (isLast) {
+                mRequestListener.onRequestSuccess(mSettableProducerContext);
+            }
+        }
     }
-    if (FrescoSystrace.isTracing()) {
-      FrescoSystrace.beginSection("AbstractProducerToDataSourceAdapter()->produceResult");
+
+    protected Map<String, Object> getExtras(ProducerContext producerContext) {
+        return producerContext.getExtras();
     }
-    producer.produceResults(createConsumer(), settableProducerContext);
-    if (FrescoSystrace.isTracing()) {
-      FrescoSystrace.endSection();
+
+    private void onFailureImpl(Throwable throwable) {
+        if (super.setFailure(throwable, getExtras(mSettableProducerContext))) {
+            mRequestListener.onRequestFailure(mSettableProducerContext, throwable);
+        }
     }
-    if (FrescoSystrace.isTracing()) {
-      FrescoSystrace.endSection();
+
+    private synchronized void onCancellationImpl() {
+        Preconditions.checkState(isClosed());
     }
-  }
 
-  private Consumer<T> createConsumer() {
-    return new BaseConsumer<T>() {
-      @Override
-      protected void onNewResultImpl(@Nullable T newResult, @Status int status) {
-        AbstractProducerToDataSourceAdapter.this.onNewResultImpl(
-            newResult, status, mSettableProducerContext);
-      }
-
-      @Override
-      protected void onFailureImpl(Throwable throwable) {
-        AbstractProducerToDataSourceAdapter.this.onFailureImpl(throwable);
-      }
-
-      @Override
-      protected void onCancellationImpl() {
-        AbstractProducerToDataSourceAdapter.this.onCancellationImpl();
-      }
-
-      @Override
-      protected void onProgressUpdateImpl(float progress) {
-        AbstractProducerToDataSourceAdapter.this.setProgress(progress);
-      }
-    };
-  }
-
-  protected void onNewResultImpl(@Nullable T result, int status, ProducerContext producerContext) {
-    boolean isLast = BaseConsumer.isLast(status);
-    if (super.setResult(result, isLast, getExtras(producerContext))) {
-      if (isLast) {
-        mRequestListener.onRequestSuccess(mSettableProducerContext);
-      }
+    @Override
+    public ImageRequest getImageRequest() {
+        return mSettableProducerContext.getImageRequest();
     }
-  }
 
-  protected Map<String, Object> getExtras(ProducerContext producerContext) {
-    return producerContext.getExtras();
-  }
-
-  private void onFailureImpl(Throwable throwable) {
-    if (super.setFailure(throwable, getExtras(mSettableProducerContext))) {
-      mRequestListener.onRequestFailure(mSettableProducerContext, throwable);
+    @Override
+    public boolean close() {
+        if (!super.close()) {
+            return false;
+        }
+        if (!super.isFinished()) {
+            mRequestListener.onRequestCancellation(mSettableProducerContext);
+            mSettableProducerContext.cancel();
+        }
+        return true;
     }
-  }
 
-  private synchronized void onCancellationImpl() {
-    Preconditions.checkState(isClosed());
-  }
-
-  @Override
-  public ImageRequest getImageRequest() {
-    return mSettableProducerContext.getImageRequest();
-  }
-
-  @Override
-  public boolean close() {
-    if (!super.close()) {
-      return false;
+    private void setInitialExtras() {
+        setExtras(mSettableProducerContext.getExtras());
     }
-    if (!super.isFinished()) {
-      mRequestListener.onRequestCancellation(mSettableProducerContext);
-      mSettableProducerContext.cancel();
-    }
-    return true;
-  }
-
-  private void setInitialExtras() {
-    setExtras(mSettableProducerContext.getExtras());
-  }
 }

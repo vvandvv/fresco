@@ -24,12 +24,12 @@ import com.facebook.infer.annotation.Nullsafe;
 @Nullsafe(Nullsafe.Mode.STRICT)
 public interface Producer<T> {
 
-  /**
-   * Start producing results for given context. Provided consumer is notified whenever progress is
-   * made (new value is ready or error occurs).
-   *
-   * @param consumer
-   * @param context
-   */
-  void produceResults(Consumer<T> consumer, ProducerContext context);
+    /**
+     * Start producing results for given context. Provided consumer is notified whenever progress is
+     * made (new value is ready or error occurs).
+     *
+     * @param consumer
+     * @param context
+     */
+    void produceResults(Consumer<T> consumer, ProducerContext context);
 }
