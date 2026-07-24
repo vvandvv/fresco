@@ -8,7 +8,6 @@
 package com.facebook.imagepipeline.datasource;
 
 import android.graphics.Bitmap;
-
 import com.facebook.common.references.CloseableReference;
 import com.facebook.datasource.BaseDataSubscriber;
 import com.facebook.datasource.DataSource;
@@ -16,7 +15,6 @@ import com.facebook.datasource.DataSubscriber;
 import com.facebook.imagepipeline.image.CloseableBitmap;
 import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.infer.annotation.Nullsafe;
-
 import javax.annotation.Nullable;
 
 /**
@@ -45,34 +43,34 @@ import javax.annotation.Nullable;
  */
 @Nullsafe(Nullsafe.Mode.STRICT)
 public abstract class BaseBitmapDataSubscriber
-        extends BaseDataSubscriber<CloseableReference<CloseableImage>> {
+    extends BaseDataSubscriber<CloseableReference<CloseableImage>> {
 
-    @Override
-    public void onNewResultImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
-        if (!dataSource.isFinished()) {
-            return;
-        }
-
-        CloseableReference<CloseableImage> closeableImageRef = dataSource.getResult();
-        Bitmap bitmap = null;
-        if (closeableImageRef != null && closeableImageRef.get() instanceof CloseableBitmap) {
-            bitmap = ((CloseableBitmap) closeableImageRef.get()).getUnderlyingBitmap();
-        }
-
-        try {
-            onNewResultImpl(bitmap);
-        } finally {
-            CloseableReference.closeSafely(closeableImageRef);
-        }
+  @Override
+  public void onNewResultImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
+    if (!dataSource.isFinished()) {
+      return;
     }
 
-    /**
-     * The bitmap provided to this method is only guaranteed to be around for the lifespan of the
-     * method.
-     *
-     * <p>The framework will free the bitmap's memory after this method has completed.
-     *
-     * @param bitmap
-     */
-    protected abstract void onNewResultImpl(@Nullable Bitmap bitmap);
+    CloseableReference<CloseableImage> closeableImageRef = dataSource.getResult();
+    Bitmap bitmap = null;
+    if (closeableImageRef != null && closeableImageRef.get() instanceof CloseableBitmap) {
+      bitmap = ((CloseableBitmap) closeableImageRef.get()).getUnderlyingBitmap();
+    }
+
+    try {
+      onNewResultImpl(bitmap);
+    } finally {
+      CloseableReference.closeSafely(closeableImageRef);
+    }
+  }
+
+  /**
+   * The bitmap provided to this method is only guaranteed to be around for the lifespan of the
+   * method.
+   *
+   * <p>The framework will free the bitmap's memory after this method has completed.
+   *
+   * @param bitmap
+   */
+  protected abstract void onNewResultImpl(@Nullable Bitmap bitmap);
 }

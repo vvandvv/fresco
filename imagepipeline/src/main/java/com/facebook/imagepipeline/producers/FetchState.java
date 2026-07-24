@@ -31,63 +31,63 @@ public class FetchState {
     private int mOnNewResultStatusFlags;
     private @Nullable BytesRange mResponseBytesRange;
 
-    public FetchState(Consumer<EncodedImage> consumer, ProducerContext context) {
-        mConsumer = consumer;
-        mContext = context;
-        mLastIntermediateResultTimeMs = 0;
-    }
+  public FetchState(Consumer<EncodedImage> consumer, ProducerContext context) {
+    mConsumer = consumer;
+    mContext = context;
+    mLastIntermediateResultTimeMs = 0;
+  }
 
-    public Consumer<EncodedImage> getConsumer() {
-        return mConsumer;
-    }
+  public Consumer<EncodedImage> getConsumer() {
+    return mConsumer;
+  }
 
-    public ProducerContext getContext() {
-        return mContext;
-    }
+  public ProducerContext getContext() {
+    return mContext;
+  }
 
-    public String getId() {
-        return mContext.getId();
-    }
+  public String getId() {
+    return mContext.getId();
+  }
 
-    public ProducerListener2 getListener() {
-        return mContext.getProducerListener();
-    }
+  public ProducerListener2 getListener() {
+    return mContext.getProducerListener();
+  }
 
-    public Uri getUri() {
-        return mContext.getImageRequest().getSourceUri();
-    }
+  public Uri getUri() {
+    return mContext.getImageRequest().getSourceUri();
+  }
 
-    public long getLastIntermediateResultTimeMs() {
-        return mLastIntermediateResultTimeMs;
-    }
+  public long getLastIntermediateResultTimeMs() {
+    return mLastIntermediateResultTimeMs;
+  }
 
-    public void setLastIntermediateResultTimeMs(long lastIntermediateResultTimeMs) {
-        mLastIntermediateResultTimeMs = lastIntermediateResultTimeMs;
-    }
+  public void setLastIntermediateResultTimeMs(long lastIntermediateResultTimeMs) {
+    mLastIntermediateResultTimeMs = lastIntermediateResultTimeMs;
+  }
 
-    @Consumer.Status
-    public int getOnNewResultStatusFlags() {
-        return mOnNewResultStatusFlags;
-    }
+  @Consumer.Status
+  public int getOnNewResultStatusFlags() {
+    return mOnNewResultStatusFlags;
+  }
 
-    /**
-     * EXPERIMENTAL: Allows the fetcher to set extra status flags to be included in calls to {@link
-     * Consumer#onNewResult(Object, int)}.
-     */
-    public void setOnNewResultStatusFlags(@Consumer.Status int onNewResultStatusFlags) {
-        mOnNewResultStatusFlags = onNewResultStatusFlags;
-    }
+  /**
+   * EXPERIMENTAL: Allows the fetcher to set extra status flags to be included in calls to {@link
+   * Consumer#onNewResult(Object, int)}.
+   */
+  public void setOnNewResultStatusFlags(@Consumer.Status int onNewResultStatusFlags) {
+    mOnNewResultStatusFlags = onNewResultStatusFlags;
+  }
 
-    @Nullable
-    public BytesRange getResponseBytesRange() {
-        return mResponseBytesRange;
-    }
+  @Nullable
+  public BytesRange getResponseBytesRange() {
+    return mResponseBytesRange;
+  }
 
-    /**
-     * EXPERIMENTAL: Allows the fetcher to identify that the reponse is for an imcomplete portion of
-     * the whole image by defining the range of bytes being provided.
-     */
-    public void setResponseBytesRange(@Nullable BytesRange bytesRange) {
-        mResponseBytesRange = bytesRange;
-    }
+  /**
+   * EXPERIMENTAL: Allows the fetcher to identify that the reponse is for an imcomplete portion of
+   * the whole image by defining the range of bytes being provided.
+   */
+  public void setResponseBytesRange(@Nullable BytesRange bytesRange) {
+    mResponseBytesRange = bytesRange;
+  }
 }

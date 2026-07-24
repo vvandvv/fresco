@@ -8,7 +8,6 @@
 package com.facebook.common.executors;
 
 import com.facebook.infer.annotation.Nullsafe;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
@@ -34,43 +33,42 @@ import java.util.concurrent.TimeUnit;
 @Nullsafe(Nullsafe.Mode.LOCAL)
 public class CallerThreadExecutor extends AbstractExecutorService {
 
-    private static final CallerThreadExecutor sInstance = new CallerThreadExecutor();
+  private static final CallerThreadExecutor sInstance = new CallerThreadExecutor();
 
-    public static CallerThreadExecutor getInstance() {
-        return sInstance;
-    }
+  public static CallerThreadExecutor getInstance() {
+    return sInstance;
+  }
 
-    private CallerThreadExecutor() {
-    }
+  private CallerThreadExecutor() {}
 
-    @Override
-    public void execute(Runnable command) {
-        command.run();
-    }
+  @Override
+  public void execute(Runnable command) {
+    command.run();
+  }
 
-    @Override
-    public boolean isShutdown() {
-        return false;
-    }
+  @Override
+  public boolean isShutdown() {
+    return false;
+  }
 
-    @Override
-    public void shutdown() {
-        // no-op
-    }
+  @Override
+  public void shutdown() {
+    // no-op
+  }
 
-    @Override
-    public List<Runnable> shutdownNow() {
-        shutdown();
-        return Collections.emptyList();
-    }
+  @Override
+  public List<Runnable> shutdownNow() {
+    shutdown();
+    return Collections.emptyList();
+  }
 
-    @Override
-    public boolean isTerminated() {
-        return false;
-    }
+  @Override
+  public boolean isTerminated() {
+    return false;
+  }
 
-    @Override
-    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        return true;
-    }
+  @Override
+  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+    return true;
+  }
 }
