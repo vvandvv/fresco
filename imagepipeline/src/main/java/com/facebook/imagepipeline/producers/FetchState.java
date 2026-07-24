@@ -8,12 +8,10 @@
 package com.facebook.imagepipeline.producers;
 
 import android.net.Uri;
-
 import com.facebook.imagepipeline.common.BytesRange;
 import com.facebook.imagepipeline.image.EncodedImage;
 import com.facebook.infer.annotation.Nullsafe;
 import com.facebook.infer.annotation.OkToExtend;
-
 import javax.annotation.Nullable;
 
 /**
@@ -25,11 +23,11 @@ import javax.annotation.Nullable;
 @OkToExtend
 public class FetchState {
 
-    private final Consumer<EncodedImage> mConsumer;
-    private final ProducerContext mContext;
-    private long mLastIntermediateResultTimeMs;
-    private int mOnNewResultStatusFlags;
-    private @Nullable BytesRange mResponseBytesRange;
+  private final Consumer<EncodedImage> mConsumer;
+  private final ProducerContext mContext;
+  private long mLastIntermediateResultTimeMs;
+  private int mOnNewResultStatusFlags;
+  private @Nullable BytesRange mResponseBytesRange;
 
   public FetchState(Consumer<EncodedImage> consumer, ProducerContext context) {
     mConsumer = consumer;
